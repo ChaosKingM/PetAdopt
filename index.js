@@ -5,7 +5,10 @@ dns.setServers(['8.8.8.8', '8.8.4.4']);
 
 // Tools
 const express = require('express');
+
+// Imports
 const connectDB = require('./src/config/database');
+const userRoutes = require('./src/routes/users')
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -13,3 +16,13 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 
 connectDB();
+
+app.get("/", (req, res) => {
+  res.status(200).send("Hey, You are in my backend!!!");
+});
+
+app.use("/api/user", userRoutes)
+
+app.listen(PORT, () => {
+    console.log(`Port connection running in: http://localhost:${PORT}`)
+});
