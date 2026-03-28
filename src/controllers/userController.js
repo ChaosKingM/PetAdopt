@@ -1,4 +1,6 @@
 const User = require('../models/users');
+const sendEmail = require('../helpers/sendEmail');
+
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const validator = require('validator');
@@ -105,9 +107,27 @@ exports.forgotPassword = async (req, res) => {
         
         await usuario.save();
 
-        console.log(`[SIMULACIÓN DE EMAIL] - Código enviado a ${email}: ${resetCode}`);
+        // 5. ¡Enviamos el correo real!
+        const mensaje = `¡Hola! Recibimos una solicitud para recuperar tu contraseña.\n\nTu código de recuperación es: ${resetCode}\n\nEste código expirará en 15 minutos.\n\nSi tú no solicitaste esto, ignora este mensaje.`;
 
-        res.status(200).json({ msg: "Recovery code has been sent to your email." });
+        try {
+            await sendEmail({
+                email: usuario.email,
+                subject: 'Tu código de recuperación de contraseña',
+                message: mensaje
+            });
+
+            // 6. Responder con el Status 200 OK
+            res.status(200).json({ msg: "Recovery Code has been sent to your email." });
+            
+        } catch (emailError) {
+            usuario.resetPasswordCode = undefined;
+            usuario.resetPasswordExpire = undefined;
+            await usuario.save();
+
+            console.error("Error sending Email:", emailError);
+            return res.status(500).json({ msg: "Error while sending email. Please try again." });
+        }
 
     } catch (error) {
         res.status(500).json({ msg: "Server Error", error: error.message });
