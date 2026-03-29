@@ -9,13 +9,17 @@ const validator = require('validator');
 exports.createUser = async (req,res) => {
     try {
         const {full_name, email, password} = req.body;
-        
+
         if (!full_name || !email || !password) {
-            return res.status(400).json({ msg: "Please fill in all fields" });
+            return res.status(401).json({ msg: "Please fill in all fields" });
+        }
+
+        if(password.length < 8) {
+            return res.status(401).json({msg: "Please enter a password with more than 8 characters"});
         }
 
         if(!validator.isEmail(email)){
-            return res.status(400).json({msg: "Please enter a valid email address"});
+            return res.status(401).json({msg: "Please enter a valid email address"});
         }
 
         const usuario = await User.findOne({email});
@@ -27,14 +31,24 @@ exports.createUser = async (req,res) => {
         const salt = await bcrypt.genSalt(10);
         const newPassword = await bcrypt.hash(password, salt);
 
-        const nuevoUser = new User({
+
+        //Because of security of the user, we create newUser which will be stored in the database
+        //Ands we create showUser, the information that will be responsed to the frontend
+        const newUser = new User({
             full_name,
             email,
             password: newPassword
         })
+        
+        const showUser = new User({
+            _id: newUser._id,
+            full_name: newUser.full_name,
+            email: newUser.email,
+            role: newUser.role || "Adopter"
+        })
 
-        await nuevoUser.save()
-        res.status(201).json(nuevoUser);
+        await newUser.save()
+        res.status(201).json(showUser);
     } catch (error) {
         res.status(500).json({error: "Error: Create user", message: error})
     }
@@ -46,6 +60,10 @@ exports.loginUser = async (req, res) => {
         const {email, password} = req.body;
         const usuario = await User.findOne({email}).select('+password');
         //Verificar email
+
+        if(password.length < 8) {
+            return res.status(401).json({msg: "Please enter a password with more than 8 characters"});
+        }
 
         if(!usuario) return res.status(401).json({msg: 'Authorization Error'});
         
@@ -65,8 +83,15 @@ exports.loginUser = async (req, res) => {
             payload,
             process.env.JWT_SECRET,
             { expiresIn: '1h'},
-        )
-        res.json({token})
+        );
+
+        res.status(200).json({
+            token: token,
+            user: {
+                full_name: usuario.full_name,
+                role: usuario.role
+            }
+        });
 
     } catch (error) {
         res.status(500).json({msg: 'Server Error', error: error})
@@ -137,6 +162,10 @@ exports.resetPassword = async (req, res) => {
     try {
         const { email, verification_code, new_password } = req.body;
 
+        if(new_password.length < 8) {
+            return res.status(400).json({msg: "Please enter a password with more than 8 characters"});
+        }
+
         if (!email || !verification_code || !new_password) {
             return res.status(400).json({ msg: "Please fill all fields" });
         }
@@ -175,7 +204,7 @@ exports.getMe = async (req, res) => {
         const usuario = await User.findById(req.usuario.id).select('_id full_name email role');
 
         if (!usuario) {
-            return res.status(404).json({ msg: 'Usuario no encontrado' });
+            return res.status(401).json({ msg: 'Error: Unauthorized' });
         }
 
         res.status(200).json(usuario);
