@@ -107,17 +107,15 @@ exports.forgotPassword = async (req, res) => {
         
         await usuario.save();
 
-        // 5. ¡Enviamos el correo real!
-        const mensaje = `¡Hola! Recibimos una solicitud para recuperar tu contraseña.\n\nTu código de recuperación es: ${resetCode}\n\nEste código expirará en 15 minutos.\n\nSi tú no solicitaste esto, ignora este mensaje.`;
+        const mensaje = `¡Hi! We received a request to recover your password.\n\nYour recovery code is: ${resetCode}\n\nThis code will expire in 15 minutes.\n\nIf you did not ask for this recovery, ignore the message.`;
 
         try {
             await sendEmail({
                 email: usuario.email,
-                subject: 'Tu código de recuperación de contraseña',
+                subject: 'Password Recovery Code',
                 message: mensaje
             });
 
-            // 6. Responder con el Status 200 OK
             res.status(200).json({ msg: "Recovery Code has been sent to your email." });
             
         } catch (emailError) {
@@ -131,5 +129,58 @@ exports.forgotPassword = async (req, res) => {
 
     } catch (error) {
         res.status(500).json({ msg: "Server Error", error: error.message });
+    }
+}
+
+// resetPassword
+exports.resetPassword = async (req, res) => {
+    try {
+        const { email, verification_code, new_password } = req.body;
+
+        if (!email || !verification_code || !new_password) {
+            return res.status(400).json({ msg: "Please fill all fields" });
+        }
+
+        const usuario = await User.findOne({ 
+            email: email,
+            resetPasswordCode: verification_code 
+        });
+
+        if (!usuario) {
+            return res.status(400).json({ msg: "Code does not exist or it is invalid" });
+        }
+
+        if (usuario.resetPasswordExpire < Date.now()) {
+            return res.status(400).json({ msg: "Code expired. Please ask for a new one" });
+        }
+
+        const salt = await bcrypt.genSalt(10);
+        usuario.password = await bcrypt.hash(new_password, salt);
+
+        usuario.resetPasswordCode = undefined;
+        usuario.resetPasswordExpire = undefined;
+
+        await usuario.save();
+
+        res.status(200).json({ msg: "Password updated correctly. Now you can login." });
+
+    } catch (error) {
+        res.status(500).json({ msg: "Server error", error: error.message });
+    }
+}
+
+// getMe 
+exports.getMe = async (req, res) => {
+    try {
+        const usuario = await User.findById(req.usuario.id).select('_id full_name email role');
+
+        if (!usuario) {
+            return res.status(404).json({ msg: 'Usuario no encontrado' });
+        }
+
+        res.status(200).json(usuario);
+
+    } catch (error) {
+        res.status(500).json({ msg: 'Error en el servidor', error: error.message });
     }
 }
