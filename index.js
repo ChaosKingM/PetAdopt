@@ -10,6 +10,7 @@ const express = require('express');
 const connectDB = require('./src/config/database');
 const userRoutes = require('./src/routes/users');
 const petRoutes = require('./src/routes/pets');
+const swipeRoutes = require('./src/routes/swipes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -25,6 +26,8 @@ app.get("/", (req, res) => {
 app.use("/api/user", userRoutes);
 
 app.use("/api/pets", petRoutes);
+
+app.use("/api/swipe", swipeRoutes);
 
 app.listen(PORT, () => {
     console.log(`Port connection running in: http://localhost:${PORT}`)

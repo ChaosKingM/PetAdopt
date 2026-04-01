@@ -45,7 +45,7 @@ const petScheme = new mongoose.Schema({
         type: Array
     },
     image: {
-        type: String,
+        type: Array,
         required: true
     },
     status: {

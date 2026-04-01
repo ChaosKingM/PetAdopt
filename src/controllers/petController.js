@@ -3,7 +3,7 @@ const Pet = require('../models/pets');
 exports.getAllPets = async (req,res) => {
     try {
         const pets = await Pet.find().select('_id name species image status');
-        res.json(pets);
+        res.status(200).json(pets);
     } catch (error) {
         res.status(500).json({error: "Error: Get Pets", message: error});
     }
