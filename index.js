@@ -15,8 +15,29 @@ const swipeRoutes = require('./src/routes/swipes');
 const swaggerUi = require('swagger-ui-express');
 const swaggerJsdoc = require('swagger-jsdoc');
 
+const swaggerUi = require('swagger-ui-express');
+const swaggerJsdoc = require('swagger-jsdoc');
+
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+
+const swaggerOptions = {
+    definition: {
+        openapi: '3.0.0',
+        info: {
+            title: 'PetAdopt API Documentation',
+            version: '1.0.0',
+            description: 'API for the storage and reading of adoption center database',
+        }, 
+        servers: [
+            {
+                url: `http://localhost:${PORT}`,
+            }
+        ]
+    },
+    apis: ['./index.js', './src/routes/*.js'], 
+};
 
 
 const swaggerOptions = {
@@ -43,6 +64,14 @@ connectDB();
 app.get("/", (req, res) => {
   res.status(200).send("Hey, You are in my backend!!!");
 });
+
+const swaggerDocs = swaggerJsdoc(swaggerOptions);
+app.use('/petAdopt/Api-Doc', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+
+
+
+
+
 
 const swaggerDocs = swaggerJsdoc(swaggerOptions);
 app.use('/petAdopt/Api-Doc', swaggerUi.serve, swaggerUi.setup(swaggerDocs));

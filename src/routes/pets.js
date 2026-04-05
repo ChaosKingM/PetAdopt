@@ -18,6 +18,20 @@ const {verifyToken, verifyAdmin} = require('../middlewares/auth');
  *       500:
  *         description: Server Error
  */
+//Get
+/**
+ * @openapi
+ * /api/pets/:
+ *   get:
+ *     tags:
+ *       - Pets
+ *     summary: Get all pets data form the database
+ *     responses:
+ *       200:
+ *         description: OK
+ *       500:
+ *         description: Server Error
+ */
 router.get("/", petController.getAllPets);
 
 /**
