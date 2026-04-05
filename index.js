@@ -60,7 +60,7 @@ app.use("/api/user", userRoutes);
  *   get:
  *     tags:
  *       - System
- *     summary: Welcome message
+ *     summary: Welcoming
  *     responses:
  *       200:
  *         description: A simple welcome message
