@@ -17,8 +17,6 @@ const {verifyToken} = require('../middlewares/auth');
  *         description: OK
  *       401:
  *         Unauthirized
- *       404:
- *         User Not Found
  *       500:
  *         description: Server Error
  */
@@ -131,8 +129,6 @@ router.post("/login", userController.loginUser);
  *     responses:
  *       200:
  *         description: Ok
- *       400:
- *         description: Bad Request
  *       500:
  *         description: Server Error
  */
@@ -164,8 +160,6 @@ router.post("/logout", verifyToken, userController.logoutUser);
  *         description: Ok
  *       400:
  *         description: Bad Request
- *       500:
- *         description: Server Error
  */
 router.post("/forgot-password", userController.forgotPassword);
 
@@ -184,6 +178,8 @@ router.post("/forgot-password", userController.forgotPassword);
  *             type: object
  *             required:
  *               - email
+ *               - verification_code
+ *               - new_password
  *             properties:
  *               email:
  *                 type: string
@@ -196,6 +192,8 @@ router.post("/forgot-password", userController.forgotPassword);
  *                 description: Change password
  *           example:
  *             email: "myUser@petAdopt.com"
+ *             verification_code: 1234
+ *             new_password: "m1N3w53cur3W0rdP455"
  *     responses:
  *       200:
  *         description: Ok
