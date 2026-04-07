@@ -64,7 +64,7 @@ app.use("/api/user", userRoutes);
 
 /**
  * @openapi
- * /api/:
+ * /:
  *   get:
  *     tags:
  *       - System
