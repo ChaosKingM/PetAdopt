@@ -7,6 +7,7 @@ dns.setServers(['8.8.8.8', '8.8.4.4']);
 const express = require('express');
 
 // Imports
+const cors = require('cors');
 const connectDB = require('./src/config/database');
 const userRoutes = require('./src/routes/users');
 const petRoutes = require('./src/routes/pets');
@@ -37,9 +38,7 @@ const swaggerOptions = {
     apis: ['./index.js', './src/routes/*.js'], 
 };
 
-
-
-
+app.use(cors());
 app.use(express.json());
 
 connectDB();
