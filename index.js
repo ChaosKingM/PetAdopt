@@ -7,6 +7,7 @@ dns.setServers(['8.8.8.8', '8.8.4.4']);
 const express = require('express');
 
 // Imports
+const cors = require('cors');
 const connectDB = require('./src/config/database');
 const userRoutes = require('./src/routes/users');
 const petRoutes = require('./src/routes/pets');
@@ -15,6 +16,7 @@ const swipeRoutes = require('./src/routes/swipes');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+app.use(cors());
 app.use(express.json());
 
 connectDB();
